@@ -2,8 +2,8 @@
 #define DISPLAY_H
 
 #include <string>
-#define SDL_MAIN_HANDLED //https://stackoverflow.com/questions/32342285/undefined-reference-to-winmain16-c-sdl-2/32343111#32343111
-#include <SDL2/SDL.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "mouse.h"
 
 class Display {
@@ -17,8 +17,7 @@ class Display {
 
         virtual ~Display();
     private:
-        SDL_Window* window;
-        SDL_GLContext glContext;
+        GLFWwindow* window;
         bool isClosed;
 };
 

@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
 
     while(!display.IsClosed()){
         display.Clear(0.0f,0.15f,0.3f,1.0f);
-        shader.Bind(SDL_GetTicks(),WIDTH,HEIGHT,mouse); //Binds all the variables you want to share with the GPU.
+        shader.Bind(glfwGetTime()/1000,WIDTH,HEIGHT,mouse); //Binds all the variables you want to share with the GPU.
         mesh.Draw();
         display.ListenInput(&mouse);
         display.Update();

@@ -3,42 +3,44 @@
 #include "GL/glew.h"
 #include <iostream>
 
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0,0,width, height);
+}
+
 Display::Display(int width, int height, const std::string& title){
 
-    SDL_Init(SDL_INIT_EVERYTHING);
-
-    //Hide cursor and set it always at middle of screen
-    SDL_ShowCursor(0);
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-
-    //32 bit color + transparency
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, 32);
-
-    //Enable double buffering
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-    window =  SDL_CreateWindow(title.c_str(),SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,SDL_WINDOW_OPENGL);
-    
-    //GPU connects directly to the window, instead of being the OS in complete command of the window
-    glContext = SDL_GL_CreateContext(window);
-
-    GLenum status = glewInit();
-
-    if(status != GLEW_OK){
-        std::cerr << "Glew failed to initialize." << std::endl;
+	    if( glfwInit() != GLFW_TRUE) {
+        std::cout << "Failed to initialize glfw" << std::endl;
     }
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    window = glfwCreateWindow(1600, 600, "test", nullptr, nullptr);
+    if(window == nullptr) {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+    }
+    glfwMakeContextCurrent(window);
+
+    // Set to disable fps
+    glfwSwapInterval(0);
+
+    GLenum err = glewInit();
+    if(err != GLEW_OK) {
+        std::cout << "Failed to initialize glew: " <<glewGetErrorString(err) << std::endl;
+    }
+
+    glViewport(0,0, 1600, 600); // x,y -> lower left corner
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback); // callback for resizing window
+
 
     isClosed = false;
 }
 
 Display::~Display(){
-    SDL_GL_DeleteContext(glContext);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    glfwTerminate();
 }
 
 void Display::Clear(float r, float g, float b, float a){
@@ -47,29 +49,34 @@ void Display::Clear(float r, float g, float b, float a){
 }
 
 void Display::ListenInput(Mouse *mouse){
-     SDL_Event e;
+    if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+        mouse->moveMouse(0,-0.05);
+    }
 
-    const Uint8 *keystate = SDL_GetKeyboardState(NULL);
+    if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+        mouse->moveMouse(0,0.05);
+    }
 
-    if(keystate[SDL_SCANCODE_KP_PLUS]){
+    if(glfwGetKey(window, GLFW_KEY_KP_ADD) == GLFW_PRESS){
         mouse->zoomMouse();
     }
 
-    if(keystate[SDL_SCANCODE_KP_MINUS]){
+    if(glfwGetKey(window, GLFW_KEY_KP_SUBTRACT) == GLFW_PRESS){
         mouse->unzoomMouse();
     }
 
-     while(SDL_PollEvent(&e)){
-        switch( e.type ){
-            case SDL_QUIT:
-                isClosed = true;
-                break;
-            case SDL_MOUSEMOTION:
-                mouse->moveMouse(e.motion.xrel,e.motion.yrel);
-                break;
-            default: break;
-        }
+    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        isClosed = true;
     }
+
+    if(glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){
+        mouse->moveMouse(-0.05, 0);
+    }
+
+    if(glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){
+        mouse->moveMouse(0.05, 0);
+    }
+
 }
 
 bool Display::IsClosed(){
@@ -77,7 +84,8 @@ bool Display::IsClosed(){
 }
 
 void Display::Update(){
-    SDL_GL_SwapWindow(window);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
 }
 
 

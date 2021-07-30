@@ -12,7 +12,7 @@ varying float vSystemTime;
 varying vec2 vSystemResolution;
 varying vec3 vMouse;
 
-float maxIterations = 100;
+float maxIterations = 500;
 
 vec2 orbitTrap = vec2(2.0,2.0); //Max length is always 2
 vec2 orbitTrapMax = vec2(0.0,0.0);
